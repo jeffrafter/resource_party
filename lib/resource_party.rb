@@ -18,7 +18,7 @@ module ResourceParty
     
     def initialize(params = {}, query = {}, no_defaults = false) 
       return self if no_defaults
-      response = self.class.get("/#{self.route}/new.xml")
+      response = self.class.get("/#{self.class.route}/new.xml")
       raise ServerError.new(response.body) if response.code != "200"
       hash = Hash.from_xml(response.body).values.first
       hash.merge! params

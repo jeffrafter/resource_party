@@ -1,8 +1,149 @@
 resource_party
 ==============
 
-Description goes here.
+ResourceParty is a simple wrapper around HTTParty that allows you to do basic
+operations with a restful resource (presumably implemented in rails). It 
+assumes a scaffolded resource in the following form:
 
+  class FoosController < ApplicationController
+    # GET /foo
+    # GET /foo.xml
+    def index
+      @foo = Foo.find(:all)
+      respond_to do |format|
+        format.html # index.rhtml
+        format.xml  { render :xml => @foo.to_xml }
+      end
+    end
+
+    # GET /foo/1
+    # GET /foo/1.xml
+    def show
+      @foo = Foo.find(params[:id])
+      respond_to do |format|
+        format.html # show.rhtml
+        format.xml  { render :xml => @foo.to_xml }
+      end
+    rescue ActiveRecord::RecordNotFound => rnf
+      render :text => rnf.message, :status => :not_found
+    rescue Exception => e
+      render :text => e.message, :status => :error    
+    end
+
+    # GET /foo/new
+    def new
+      @foo = Foo.new
+      respond_to do |format|
+        format.html # new.rhtml
+        format.xml  { render :xml => @foo.to_xml }
+      end
+    end
+
+    # GET /foo/1;edit
+    def edit
+      @foo = Foo.find(params[:id])
+    end
+
+    # POST /foo
+    # POST /foo.xml
+    def create
+      @foo = Foo.new(params[:foo])
+      respond_to do |format|
+        if @foo.save
+          flash[:notice] = 'Foo type was successfully created.'
+          format.html { redirect_to foo_url(@foo) }
+          format.xml  { render :xml => @foo.to_xml }
+        else
+          format.html { render :action => "new" }
+          format.xml  { render :xml => @foo.errors.to_xml }
+        end
+      end
+    rescue Exception => e
+      render :text => e.message, :status => :error    
+    end
+
+    # PUT /foo/1
+    # PUT /foo/1.xml
+    def update
+      @foo = Foo.find(params[:id])
+      respond_to do |format|
+        if @foo.update_attributes(params[:foo])
+          flash[:notice] = 'Foo type was successfully updated.'
+          format.html { redirect_to foo_url(@foo) }
+          format.xml  { render :xml => @foo.to_xml }
+        else
+          format.html { render :action => "edit" }
+          format.xml  { render :xml => @foo.errors.to_xml }
+        end
+      end
+    rescue ActiveRecord::RecordNotFound => rnf
+      render :text => rnf.message, :status => :not_found
+    rescue Exception => e
+      render :text => e.message, :status => :error    
+    end
+
+    # DELETE /foo/1
+    # DELETE /foo/1.xml
+    def destroy
+      @foo = Foo.find(params[:id])
+      @foo.destroy
+      respond_to do |format|
+        format.html { redirect_to foo_url }
+        format.xml  { head :ok }
+      end
+    rescue ActiveRecord::RecordNotFound => rnf
+      render :text => rnf.message, :status => :not_found
+    rescue Exception => e
+      render :text => e.message, :status => :error    
+    end
+  end
+
+Returning head :ok for create and update is permissable (though I find returning
+the actual resource is potentially more helpful as there may have been changes
+made in the model before_create or before_update).
+
+Notice that there is explicit exception handling which improves the 
+communication. This will hopefully be expanded to include better validation 
+error handling.
+
+To make your models join the party:
+
+  require 'resource_party'
+
+  class Foo < ResourceParty::Base
+    base_uri 'http://localhost:3000'
+    route_for 'foos'
+    resource_for 'foo'
+  end
+
++route_for+ will be used to generate the path, i.e. "/{route_for}/4.xml"
++resource_for+ will be used when building params (like form_for)
+
+I know both of these are automatic if you are already using active_support by
+using class.to_s.downcase.singularize and friends. But hey.
+
+Once this is built you should be able to 
+
+  Foo.all
+  => returns an array of Foos (from the index)
+  
+  Foo.find(id)
+  => returns a foo or a ResourceParty::RecordNotFound
+  
+  Foo.destroy(id) or foo.destroy
+  => Deletes the foo, returns true if successful
+  
+  Foo.update(id, {:my_field => "this is the change!"}) or foo.update(...)
+  => Updates the foo with the params, returns true if the controller 
+  => responds with :head, otherwise returns the foo
+
+  Foo.create({:my_field => "this is the new stuff"})
+  => Creates the foo with the params, returns true if the controller 
+  => responds with :head, otherwise returns the foo
+  
+  Foo.new
+  => Fetches a blank foo so that defaulted params are possible
+  
 COPYRIGHT
 =========
 

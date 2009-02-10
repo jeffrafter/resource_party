@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/test_helper'
 
 class ResourcePartyTest < Test::Unit::TestCase
-  should "probably rename this file and start testing for real" do
-    flunk "hey buddy, you should probably rename this file and start testing for real"
+  should "be usable by the masses" do
+    assert_not_nil ResourceParty::Base
   end
 end

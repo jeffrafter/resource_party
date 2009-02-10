@@ -2,14 +2,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{resource_party}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeff Rafter"]
-  s.date = %q{2009-02-09}
+  s.date = %q{2009-02-10}
   s.description = %q{Simple wrapper for HTTParty for basic operations with a restful resource}
   s.email = %q{jeff@baobabhealth.org}
-  s.files = ["LICENSE", "Rakefile", "README", "VERSION.yml", "lib/resource_party.rb"]
+  s.files = ["LICENSE", "Rakefile", "README", "VERSION.yml", "lib/resource_party.rb", "test/resource_party_test.rb", "test/test_helper.rb"]
   s.homepage = %q{http://github.com/jeffrafter/resource_party}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.1}

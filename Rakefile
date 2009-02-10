@@ -12,7 +12,7 @@ begin
     s.description = "Simple wrapper for HTTParty for basic operations with a restful resource"
     s.authors = ["Jeff Rafter"]
     s.add_dependency "jnunemaker-httparty"
-    s.files =  FileList["[A-Z]*", "{lib, test}/**/*"] 
+    s.files =  FileList["[A-Z]*", "{lib,test}/**/*"] 
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"

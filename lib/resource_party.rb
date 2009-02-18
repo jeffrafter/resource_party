@@ -19,33 +19,30 @@ module ResourceParty
     def initialize(params = {}, query = {}, no_defaults = false) 
       return self if no_defaults
       response = self.class.get("/#{self.class.route}/new.xml")
-      raise ServerError.new(response.body) if response.code != "200"
+      handle_errors(response)
       hash = Hash.from_xml(response.body).values.first
       hash.merge! params
       self.class.from_xml hash, self
     end
 
-    def self.find(id, query = {})
-      response = self.get("/#{self.route}/#{id}.xml", :query => query) 
-      raise RecordNotFound.new(response.body) if response.code == "404"
-      raise ServerError.new(response.body) if response.code != "200"
-      hash = Hash.from_xml(response.body).values.first
-      self.from_xml hash
+    def self.find(param, query = {})
+      response = self.get("/#{self.route}/#{param}.xml", :query => query) 
+      handle_not_found(response)
+      handle_errors(response)
+      handle_response(response)
     end
     
     def self.create(params = {}, query = {})
       response = self.post("/#{self.route}.xml", :body => body_for(params), :query => query) 
-      raise ServerError.new(response.body) if response.code != "200"
-      hash = Hash.from_xml(response.body).values.first
-      self.from_xml hash    
+      handle_errors(response)
+      handle_response(response)
     end
     
-    def self.update(id, params = {}, query = {})
-      response = self.put("/#{self.route}/#{id}.xml", :body => body_for(params), :query => query) 
-      raise RecordNotFound.new(response.body) if response.code == "404"
-      raise ServerError.new(response.body) if response.code != "200"
-      hash = Hash.from_xml(response.body).values.first
-      self.from_xml hash    
+    def self.update(param, params = {}, query = {})
+      response = self.put("/#{self.route}/#{param}.xml", :body => body_for(params), :query => query) 
+      handle_not_found(response)
+      handle_errors(response)
+      handle_response(response)
     end
     
     def update(params = {}, query = {})
@@ -53,10 +50,10 @@ module ResourceParty
     end
 
     def self.destroy(id, query = {}) 
-      response = self.delete("/#{self.route}/#{id}.xml", :query => query, :format => :text) 
-      raise RecordNotFound.new(response.body) if response.code == "404"
-      raise ServerError.new(response.body) if response.code != "200"
-      true
+      response = self.delete("/#{self.route}/#{id}.xml", :query => query) 
+      handle_not_found(response)
+      handle_errors(response)
+      handle_response(response)
     end
     
     def destroy(query = {})
@@ -65,17 +62,33 @@ module ResourceParty
 
     def self.all(query = {})
       response = self.get("/#{self.route}.xml", :query => query) 
-      raise ServerError.new(response.body) if response.code != "200"
+      handle_errors(response)
       items = response.values.first
       items.map{|hash| self.from_xml hash }        
     end
 
   private
 
+    def self.handle_not_found(response)
+      raise RecordNotFound.new(response.body) if response.code == "404"
+    end    
+
+    def self.handle_errors(response)
+      raise ServerError.new(response.body) if response.code != "200"
+    end
+    
+    def self.handle_response(response)
+      # Rails will return ' ' when you render :nothing => true
+      return nil if response.body.blank? || response.body == ' '
+      hash = Hash.from_xml(response.body).values.first
+      self.from_xml hash    
+    end  
+
     def self.body_for(params)
+      require 'cgi' unless defined?(CGI) && defined?(CGI::escape)
       body = {}
       params.each{|n,v| body["#{self.resource}[#{n}]"] = v }
-      body.to_query
+      body.map{|n,v| "#{CGI.escape(n.to_s)}=#{CGI.escape(v.to_s)}"} * "&"
     end
     
     def self.from_xml(params, obj = nil)

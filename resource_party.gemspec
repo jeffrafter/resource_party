@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{resource_party}
-  s.version = "0.1.2"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeff Rafter"]
-  s.date = %q{2009-02-10}
+  s.date = %q{2009-03-05}
   s.description = %q{Simple wrapper for HTTParty for basic operations with a restful resource}
   s.email = %q{jeff@baobabhealth.org}
   s.files = ["LICENSE", "Rakefile", "README", "VERSION.yml", "lib/resource_party.rb", "test/resource_party_test.rb", "test/test_helper.rb"]
@@ -21,10 +21,13 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<jnunemaker-httparty>, [">= 0"])
+      s.add_runtime_dependency(%q<htmlentities>, [">= 0"])
     else
       s.add_dependency(%q<jnunemaker-httparty>, [">= 0"])
+      s.add_dependency(%q<htmlentities>, [">= 0"])
     end
   else
     s.add_dependency(%q<jnunemaker-httparty>, [">= 0"])
+    s.add_dependency(%q<htmlentities>, [">= 0"])
   end
 end

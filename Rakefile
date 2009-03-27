@@ -12,6 +12,7 @@ begin
     s.description = "Simple wrapper for HTTParty for basic operations with a restful resource"
     s.authors = ["Jeff Rafter"]
     s.add_dependency "jnunemaker-httparty"
+    s.add_dependency "htmlentities"
     s.files =  FileList["[A-Z]*", "{lib,test}/**/*"] 
   end
 rescue LoadError

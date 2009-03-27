@@ -1,4 +1,5 @@
 require 'httparty'
+require 'htmlentities'
 
 module ResourceParty
   class ServerError < RuntimeError; end
@@ -93,7 +94,9 @@ module ResourceParty
     
     def self.from_xml(params, obj = nil)
       obj ||= self.new({}, {}, true)
-      obj.attributes = params
+      decoded_params = params.dup
+      params.each{|n,v| decoded_params[n] = HTMLEntities.new.decode(v) if v && v.is_a?(String) }
+      obj.attributes = decoded_params
       mod = Module.new do
         obj.attributes.keys.each do |k|
           define_method(k) do
@@ -101,7 +104,7 @@ module ResourceParty
           end
         
           define_method("#{k}=") do |val|
-            self.attributes[k] = val
+            self.attributes[k] = HTMLEntities.new.decode(val)
           end
         end
       end    
